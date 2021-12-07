@@ -1,3 +1,5 @@
+# Added logs directory
+
 # liquidator-bot-ts
 
 Apricot's USDC-only liquidator. This is a simple liquidator that maintains inventory in USDC only. This means that:
