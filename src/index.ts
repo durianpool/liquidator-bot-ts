@@ -9,6 +9,7 @@ import {
   Addresses,
   ALPHA_CONFIG,
   assert,
+  LogInfo,
   MINTS,
   PUBLIC_CONFIG,
   TokenID,
@@ -86,6 +87,7 @@ if(!firebaseMode) {
   invariant(parseInt(pageEnd) > parseInt(pageStart));
 }
 
+/*
 const date = new Date();
 const dateStr = date.toISOString();
 const dateStrSub = dateStr
@@ -94,6 +96,7 @@ const dateStrSub = dateStr
   .join('-');
 const updateTimedLogger = fs.createWriteStream(`./liquidator.updates.${pageStart}_${pageEnd}.${dateStrSub}.log`, {});
 const actionTimedLogger = fs.createWriteStream(`./liquidator.actions.${pageStart}_${pageEnd}.${dateStrSub}.log`, {});
+*/
 
 const config = alphaStr === 'alpha' ? ALPHA_CONFIG : PUBLIC_CONFIG;
 assert(config !== null);
@@ -145,11 +148,15 @@ export class LiquidatorBot {
       shuffle(userInfoWatchers);
       for (let uiw of userInfoWatchers) {
         if(firebaseMode) {
-          console.log(`Watching user ${uiw.userWalletKey.toString()}`);
+          LogInfo(`Watching user ${uiw.userWalletKey.toString()}`);
         }
         // uiw could be undefined
         if (!uiw?.accountData) {
           numNotLoaded += 1;
+          continue;
+        }
+        // skip off-page users
+        if (uiw.accountData.page_id === 65535) {
           continue;
         }
         const planner = new LiquidationPlanner(
@@ -273,14 +280,14 @@ export class LiquidatorBot {
   }
 
   logUpdate(str: string) {
-    const time = new Date();
-    updateTimedLogger.write(time.toISOString() + ': ' + str + '\n');
+    // const time = new Date();
+    // updateTimedLogger.write(time.toISOString() + ': ' + str + '\n');
     console.log(str);
   }
 
   logAction(str: string) {
-    const time = new Date();
-    actionTimedLogger.write(time.toISOString() + ': ' + str + '\n');
+    // const time = new Date();
+    // actionTimedLogger.write(time.toISOString() + ': ' + str + '\n');
     console.log(str);
   }
   getPoolIdToPrice(): PoolIdToPrice {
