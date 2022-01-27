@@ -5,6 +5,7 @@ import {
   TransactionBuilder,
   UserInfo,
   TokenID,
+  LIQUIDATION_LIMIT,
 } from '@apricot-lend/sdk-ts';
 import { PoolIdToPrice } from './types';
 import { LiquidatorBot } from '.';
@@ -44,8 +45,8 @@ export class LiquidationPlanner {
       const price = poolIdToPrice[poolId];
       if (price === undefined) continue;
       const decimalMult = config.getDecimalMultByPoolId(poolId);
-      const depositVal = (price * uai.deposit_amount.toNumber()) / decimalMult;
-      const borrowVal = (price * uai.borrow_amount.toNumber()) / decimalMult;
+      const depositVal = (price * Math.floor(uai.deposit_amount.toNumber())) / decimalMult;
+      const borrowVal = (price * Math.floor(uai.borrow_amount.toNumber())) / decimalMult;
       this.poolIdToDepositVal[poolId] = depositVal;
       this.poolIdToBorrowVal[poolId] = borrowVal;
     }
@@ -136,7 +137,7 @@ export class LiquidationPlanner {
 
   shouldLiquidate(): boolean {
     const progress = this.getBorrowProgress();
-    return progress !== null && progress > 1;
+    return progress !== null && progress > LIQUIDATION_LIMIT.toNumber();
   }
 
   async fireLiquidation(
